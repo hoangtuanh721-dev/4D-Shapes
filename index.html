@@ -1,150 +1,1369 @@
+<!DOCTYPE html>
+<html lang="vi">
 <head>
-    <style>
-        * {
-            margin: 0px;
-            font-family: Helvetica, Arial, sans-serif;
-        }
-        .graphics-view {
-            position: absolute;
-        }
-        .graphics-view-container {
-            position: relative;
-            border-radius: 24px;
-            overflow: hidden;
-            width: 50%;
-            margin: 0 auto;
-        }
-        .center-container {
-            display: block;
-        }
-        .settings-container {
-            display: block;
-            margin-left: 30%;
-            margin-bottom: 1vw;
-        }
-        .view-container {
-            display: block;
-            width: 100%;
-            margin-bottom: 2vw;
-        }
-        .view-header {
-            font-size: 2.5vw;
-            text-align: center;
-            color: #777;
-            display: block;
-        }
-        .setting-range {
-            margin: 0.5vw 2vw 0px 0px;
-        }
-        .setting-label {
-            font-size: 1vw;
-            font-weight: bold;
-            color: #777;
-        }
-        .setting-value {
-            color: #48f;
-        }
-        .settings-div {
-            display: inline-block;
-        }
-        .setting-option {
-            display: inline-block;
-            background-color: #48f;
-            border-right: #fff 1px solid;
-            margin: -2px;
-            padding: 12px;
-            color: #fff;
-            font-size: 1vw;
-            user-select: none;
-        }
-        .setting-option:hover {
-            background-color: #26f;
-            cursor: pointer;
-        }
-        .setting-option.setting-option-active {
-            background-color: #05c;
-            cursor: pointer;
-        }
-        .options-div {
-            box-shadow: 0px 0px 5px rgba(80, 150, 255, 1.0);
-            border-radius: 16px;
-            overflow: hidden;
-            margin-right: 1vw;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+
+<title>4D Geometry Explorer</title>
+
+<style>
+*{
+  box-sizing:border-box;
+  -webkit-tap-highlight-color:transparent;
+}
+
+html,body{
+  margin:0;
+  width:100%;
+  height:100%;
+  overflow:hidden;
+  background:#02040a;
+  color:white;
+  font-family:system-ui,sans-serif;
+}
+
+canvas{
+  display:block;
+  width:100%;
+  height:100%;
+  touch-action:none;
+}
+
+#panel{
+  position:fixed;
+  top:12px;
+  left:12px;
+  width:min(340px,calc(100vw - 24px));
+  padding:12px;
+  border:1px solid rgba(130,180,255,.25);
+  border-radius:16px;
+  background:rgba(4,8,16,.72);
+  backdrop-filter:blur(12px);
+  z-index:10;
+}
+
+.title{
+  font-size:17px;
+  font-weight:700;
+  margin-bottom:4px;
+}
+
+.info{
+  color:#9eabc0;
+  font-size:11px;
+  line-height:1.4;
+  margin-bottom:10px;
+}
+
+.row{
+  display:flex;
+  flex-wrap:wrap;
+  gap:7px;
+}
+
+button{
+  min-height:40px;
+  border-radius:10px;
+  border:1px solid #30445f;
+  background:#101b2c;
+  color:#eaf4ff;
+  padding:7px 10px;
+  font-size:12px;
+}
+
+button:active{
+  transform:scale(.96);
+}
+
+#stats{
+  margin-top:9px;
+  color:#86c8ff;
+  font-size:11px;
+  font-variant-numeric:tabular-nums;
+}
+</style>
 </head>
+
 <body>
-    <div class="view-container">
-        <h1 class="view-header">2D</h1>
-        <div class="settings-container">
-            <div class="settings-div">
-                <p class="setting-label">Size: <span class="setting-value" id="setting-range-value-2d">0.05</span></p>
-                <input type="range" class="setting-range" value="10" id="setting-range-2d">
-            </div>
-            <div class="settings-div">
-                <div class="options-div" id="options-operation-2d">
-                    <div class="setting-option">Square</div>
-                    <div class="setting-option setting-option-active">Circle</div>
-                    <div class="setting-option">Triangle</div>
-                    <div class="setting-option">Hexagon</div>
-                </div>
-            </div>
-            <div class="settings-div">
-                <div class="options-div" id="options-movement">
-                    <div class="setting-option setting-option-active">Rotation</div>
-                    <div class="setting-option">Movement</div>
-                </div>
-            </div>
-        </div>
-        <div class="center-container">
-            <div class="graphics-view-container" id="graphics-view-2d"></div>
-        </div>
-    </div>
-    <div class="view-container">
-        <h1 class="view-header">3D</h1>
-        <div class="settings-container">
-            <div class="settings-div">
-                <p class="setting-label">Offset: <span class="setting-value" id="setting-range-value-3d">0.15</span></p>
-                <input type="range" class="setting-range" value="30" id="setting-range-3d">
-            </div>
-            <div class="settings-div">
-                <div class="options-div" id="options-operation-3d">
-                    <div class="setting-option">Extrude</div>
-                    <div class="setting-option setting-option-active">Revolve</div>
-                    <div class="setting-option">Pinch</div>
-                </div>
-            </div>
-            <div class="settings-div">
-                <div class="options-div" id="options-view-3d">
-                    <div class="setting-option">2D</div>
-                    <div class="setting-option setting-option-active">3D</div>
-                    <div class="setting-option">2D & 3D</div>
-                </div>
-            </div>
-        </div>
-        <div class="center-container">
-            <div class="graphics-view-container" id="graphics-view-3d"></div>
-        </div>
-    </div>
-    <div class="view-container">
-        <h1 class="view-header">4D</h1>
-        <div class="settings-container">
-            <div class="settings-div">
-                <p class="setting-label">Offset: <span class="setting-value" id="setting-range-value-4d">0.5</span></p>
-                <input type="range" class="setting-range" value="100" id="setting-range-4d">
-            </div>
-            <div class="settings-div">
-                <div class="options-div" id="options-operation-4d">
-                    <div class="setting-option">Extrude</div>
-                    <div class="setting-option setting-option-active">Revolve</div>
-                    <div class="setting-option">Pinch</div>
-                </div>
-            </div>
-        </div>
-        <div class="center-container">
-            <div class="graphics-view-container" id="graphics-view-4d"></div>
-        </div>
-    </div>
-    <script type="text/javascript" src="common.js"></script>
-    <script type="text/javascript" src="graphics.js"></script>
-</body>
+
+<canvas id="canvas"></canvas>
+
+<div id="panel">
+
+  <div class="title">
+    ✦ 4D Geometry Explorer
+  </div>
+
+  <div class="info">
+    Kéo để xoay · chụm/tách để zoom · hình học tự quay
+    và di chuyển trong X/Y/Z/W.
+  </div>
+
+  <div class="row">
+    <button id="shapeButton">
+      Shape: Tesseract
+    </button>
+
+    <button id="moveButton">
+      Move: ON
+    </button>
+
+    <button id="rotateButton">
+      Rotate: ON
+    </button>
+
+    <button id="wButton">
+      W: ON
+    </button>
+
+    <button id="resetButton">
+      Reset
+    </button>
+  </div>
+
+  <div id="stats">
+    FPS: -- · Render: --
+  </div>
+
+</div>
+
+<script>
+"use strict";
+
+/* =========================================================
+   WEBGL
+========================================================= */
+
+const canvas =
+  document.getElementById("canvas");
+
+const gl =
+  canvas.getContext("webgl2",{
+    antialias:false,
+    alpha:false,
+    depth:false,
+    stencil:false,
+    preserveDrawingBuffer:false,
+    powerPreference:"high-performance"
+  });
+
+if(!gl){
+
+  document.body.innerHTML =
+    "<h3 style='padding:20px'>Thiết bị không hỗ trợ WebGL2.</h3>";
+
+  throw new Error("WebGL2 unavailable");
+}
+
+
+/* =========================================================
+   SHADERS
+========================================================= */
+
+const vertexShaderSource = `#version 300 es
+
+precision mediump float;
+
+in vec3 aPosition;
+in float aSize;
+in float aAlpha;
+
+uniform vec2 uResolution;
+uniform float uPixelRatio;
+
+out float vAlpha;
+
+void main(){
+
+    vec2 p =
+        (aPosition.xy / uResolution) * 2.0 - 1.0;
+
+    p.y = -p.y;
+
+    gl_Position =
+        vec4(p,0.0,1.0);
+
+    gl_PointSize =
+        aSize * uPixelRatio;
+
+    vAlpha = aAlpha;
+}
+`;
+
+const fragmentShaderSource = `#version 300 es
+
+precision mediump float;
+
+in float vAlpha;
+
+out vec4 outColor;
+
+void main(){
+
+    vec2 uv =
+        gl_PointCoord - vec2(.5);
+
+    float d =
+        dot(uv,uv);
+
+    if(d > .25)
+        discard;
+
+    /* lõi sáng */
+
+    float core =
+        smoothstep(
+            .075,
+            0.0,
+            d
+        );
+
+    /* quầng sáng */
+
+    float glow =
+        smoothstep(
+            .25,
+            0.0,
+            d
+        ) * .38;
+
+    float brightness =
+        core + glow;
+
+    vec3 starColor =
+        vec3(
+            .72,
+            .88,
+            1.0
+        );
+
+    outColor =
+        vec4(
+            starColor,
+            brightness * vAlpha
+        );
+}
+`;
+
+
+/* =========================================================
+   SHADER COMPILER
+========================================================= */
+
+function compileShader(type,source){
+
+    const shader =
+        gl.createShader(type);
+
+    gl.shaderSource(
+        shader,
+        source
+    );
+
+    gl.compileShader(shader);
+
+    if(!gl.getShaderParameter(
+        shader,
+        gl.COMPILE_STATUS
+    )){
+        throw new Error(
+            gl.getShaderInfoLog(shader)
+        );
+    }
+
+    return shader;
+}
+
+
+const program =
+    gl.createProgram();
+
+gl.attachShader(
+    program,
+    compileShader(
+        gl.VERTEX_SHADER,
+        vertexShaderSource
+    )
+);
+
+gl.attachShader(
+    program,
+    compileShader(
+        gl.FRAGMENT_SHADER,
+        fragmentShaderSource
+    )
+);
+
+gl.linkProgram(program);
+
+if(!gl.getProgramParameter(
+    program,
+    gl.LINK_STATUS
+)){
+    throw new Error(
+        gl.getProgramInfoLog(program)
+    );
+}
+
+gl.useProgram(program);
+
+
+/* =========================================================
+   LOCATIONS
+========================================================= */
+
+const positionLocation =
+    gl.getAttribLocation(
+        program,
+        "aPosition"
+    );
+
+const sizeLocation =
+    gl.getAttribLocation(
+        program,
+        "aSize"
+    );
+
+const alphaLocation =
+    gl.getAttribLocation(
+        program,
+        "aAlpha"
+    );
+
+const resolutionLocation =
+    gl.getUniformLocation(
+        program,
+        "uResolution"
+    );
+
+const pixelRatioLocation =
+    gl.getUniformLocation(
+        program,
+        "uPixelRatio"
+    );
+
+
+/* =========================================================
+   BUFFERS
+========================================================= */
+
+const positionBuffer =
+    gl.createBuffer();
+
+const sizeBuffer =
+    gl.createBuffer();
+
+const alphaBuffer =
+    gl.createBuffer();
+
+
+/* =========================================================
+   4D SHAPES
+========================================================= */
+
+let vertices = [];
+let edges = [];
+
+
+/* TESSERACT */
+
+function createTesseract(){
+
+    const v = [];
+
+    for(const x of [-1,1])
+    for(const y of [-1,1])
+    for(const z of [-1,1])
+    for(const w of [-1,1]){
+
+        v.push([
+            x,y,z,w
+        ]);
+    }
+
+    const e = [];
+
+    for(let i=0;i<16;i++){
+
+        for(let j=i+1;j<16;j++){
+
+            let difference=0;
+
+            for(let k=0;k<4;k++){
+
+                if(
+                    v[i][k] !==
+                    v[j][k]
+                ){
+                    difference++;
+                }
+            }
+
+            if(difference===1){
+
+                e.push([
+                    i,j
+                ]);
+            }
+        }
+    }
+
+    return [v,e];
+}
+
+
+/* 4D CROSS */
+
+function createCross(){
+
+    const v = [
+        [0,0,0,0]
+    ];
+
+    for(let axis=0;axis<4;axis++){
+
+        for(const side of [-1,1]){
+
+            const p =
+                [0,0,0,0];
+
+            p[axis] = side;
+
+            v.push(p);
+        }
+    }
+
+    const e=[];
+
+    for(let i=1;i<v.length;i++){
+
+        e.push([
+            0,
+            i
+        ]);
+    }
+
+    return [v,e];
+}
+
+
+/* 4D SIMPLEX / STRUCTURE */
+
+function createSimplex(){
+
+    const v=[
+
+        [ 1, 1, 1, 1],
+        [ 1,-1,-1, 1],
+        [-1, 1,-1, 1],
+        [-1,-1, 1, 1],
+
+        [ 1, 1,-1,-1],
+        [ 1,-1, 1,-1],
+        [-1, 1, 1,-1],
+        [-1,-1,-1,-1]
+
+    ];
+
+    const e=[];
+
+    for(
+        let i=0;
+        i<v.length;
+        i++
+    ){
+
+        for(
+            let j=i+1;
+            j<v.length;
+            j++
+        ){
+
+            let d=0;
+
+            for(let k=0;k<4;k++){
+
+                if(
+                    v[i][k] !==
+                    v[j][k]
+                ){
+                    d++;
+                }
+            }
+
+            if(d>=3){
+
+                e.push([
+                    i,j
+                ]);
+            }
+        }
+    }
+
+    return [v,e];
+}
+
+
+/* 4D STAR */
+
+function createStar(){
+
+    const v=[];
+
+    const a=.75;
+    const b=1.25;
+
+    for(const s of [-1,1]){
+
+        v.push(
+            [s*a,0,b,0],
+            [s*a,0,-b,0],
+            [0,s*a,b,0],
+            [0,s*a,-b,0],
+
+            [s*a,0,0,b],
+            [s*a,0,0,-b],
+            [0,s*a,0,b],
+            [0,s*a,0,-b]
+        );
+    }
+
+    const e=[];
+
+    for(
+        let i=0;
+        i<v.length;
+        i++
+    ){
+
+        for(
+            let j=i+1;
+            j<v.length;
+            j++
+        ){
+
+            const dx =
+                v[i][0]-v[j][0];
+
+            const dy =
+                v[i][1]-v[j][1];
+
+            const dz =
+                v[i][2]-v[j][2];
+
+            const dw =
+                v[i][3]-v[j][3];
+
+            const distance =
+                Math.sqrt(
+                    dx*dx+
+                    dy*dy+
+                    dz*dz+
+                    dw*dw
+                );
+
+            if(
+                distance>.9 &&
+                distance<1.7
+            ){
+                e.push([
+                    i,j
+                ]);
+            }
+        }
+    }
+
+    return [v,e];
+}
+
+
+/* =========================================================
+   SHAPE LIST
+========================================================= */
+
+const shapes=[
+
+    [
+        "Tesseract",
+        createTesseract
+    ],
+
+    [
+        "4D Cross",
+        createCross
+    ],
+
+    [
+        "4D Simplex",
+        createSimplex
+    ],
+
+    [
+        "4D Star",
+        createStar
+    ]
+
+];
+
+let currentShape=0;
+
+
+function setShape(index){
+
+    currentShape =
+        (index + shapes.length)
+        % shapes.length;
+
+    [
+        vertices,
+        edges
+    ] =
+        shapes[
+            currentShape
+        ][1]();
+
+    document
+        .getElementById(
+            "shapeButton"
+        )
+        .textContent =
+        "Shape: "+
+        shapes[currentShape][0];
+}
+
+
+setShape(0);
+
+
+/* =========================================================
+   BACKGROUND STARS
+========================================================= */
+
+const stars=[];
+
+for(
+    let i=0;
+    i<80;
+    i++
+){
+
+    stars.push({
+
+        x:(Math.random()*2-1)*10,
+
+        y:(Math.random()*2-1)*10,
+
+        z:(Math.random()*2-1)*10,
+
+        size:
+            Math.random()*1.8+.6
+    });
+}
+
+
+/* =========================================================
+   SIMULATION STATE
+========================================================= */
+
+let position =
+    [0,0,0,0];
+
+let velocity =
+    [.35,.21,.27,.17];
+
+let targetVelocity =
+    [...velocity];
+
+let randomTimer=0;
+
+let time=0;
+
+let autoMove=true;
+let autoRotate=true;
+let autoW=true;
+
+let cameraYaw=-.7;
+let cameraPitch=.45;
+let cameraDistance=7;
+
+
+/* =========================================================
+   RANDOM 4D MOVEMENT
+========================================================= */
+
+function randomDirection(){
+
+    const v=[
+        Math.random()*2-1,
+        Math.random()*2-1,
+        Math.random()*2-1,
+        Math.random()*2-1
+    ];
+
+    const length =
+        Math.hypot(...v) || 1;
+
+    const speed =
+        .25 +
+        Math.random()*.35;
+
+    return v.map(
+        x =>
+        x/length*speed
+    );
+}
+
+
+/* =========================================================
+   4D ROTATION
+========================================================= */
+
+function rotate4D(p){
+
+    let [
+        x,
+        y,
+        z,
+        w
+    ]=p;
+
+
+    function rotate(
+        a,
+        b,
+        angle
+    ){
+
+        const c =
+            Math.cos(angle);
+
+        const s =
+            Math.sin(angle);
+
+        const na =
+            c*a-s*b;
+
+        const nb =
+            s*a+c*b;
+
+        return [
+            na,
+            nb
+        ];
+    }
+
+
+    let r;
+
+
+    /* XY */
+
+    r=rotate(
+        x,
+        y,
+        time*.31
+    );
+
+    x=r[0];
+    y=r[1];
+
+
+    /* XZ */
+
+    r=rotate(
+        x,
+        z,
+        time*.23
+    );
+
+    x=r[0];
+    z=r[1];
+
+
+    /* YZ */
+
+    r=rotate(
+        y,
+        z,
+        time*.17
+    );
+
+    y=r[0];
+    z=r[1];
+
+
+    if(autoW){
+
+        /* XW */
+
+        r=rotate(
+            x,
+            w,
+            time*.49
+        );
+
+        x=r[0];
+        w=r[1];
+
+
+        /* YW */
+
+        r=rotate(
+            y,
+            w,
+            time*.37
+        );
+
+        y=r[0];
+        w=r[1];
+
+
+        /* ZW */
+
+        r=rotate(
+            z,
+            w,
+            time*.29
+        );
+
+        z=r[0];
+        w=r[1];
+    }
+
+
+    return [
+        x,y,z,w
+    ];
+}
+
+
+/* =========================================================
+   4D -> 3D
+========================================================= */
+
+function project4D(p){
+
+    const distance4D=4.5;
+
+    const denominator =
+        Math.max(
+            .45,
+            distance4D-p[3]
+        );
+
+    const scale =
+        distance4D /
+        denominator;
+
+    return [
+
+        p[0]*scale,
+        p[1]*scale,
+        p[2]*scale
+    ];
+}
+
+
+/* =========================================================
+   3D CAMERA
+========================================================= */
+
+function camera3D(p){
+
+    let [
+        x,y,z
+    ]=p;
+
+
+    /* Y rotation */
+
+    const cy =
+        Math.cos(cameraYaw);
+
+    const sy =
+        Math.sin(cameraYaw);
+
+    const nx =
+        cy*x-sy*z;
+
+    const nz =
+        sy*x+cy*z;
+
+    x=nx;
+    z=nz;
+
+
+    /* X rotation */
+
+    const cp =
+        Math.cos(cameraPitch);
+
+    const sp =
+        Math.sin(cameraPitch);
+
+    const ny =
+        cp*y-sp*z;
+
+    const nz2 =
+        sp*y+cp*z;
+
+    y=ny;
+    z=nz2;
+
+
+    /* perspective */
+
+    const denominator =
+        Math.max(
+            .5,
+            cameraDistance-z
+        );
+
+    const scale =
+        cameraDistance/
+        denominator;
+
+
+    return [
+        x*scale,
+        y*scale,
+        z
+    ];
+}
+
+
+/* =========================================================
+   SCREEN
+========================================================= */
+
+function screenPosition(p){
+
+    const factor =
+        Math.min(
+            canvas.width,
+            canvas.height
+        )*.095;
+
+    return [
+
+        canvas.width/2+
+        p[0]*factor,
+
+        canvas.height/2+
+        p[1]*factor
+    ];
+}
+
+
+/* =========================================================
+   RESIZE
+========================================================= */
+
+function resize(){
+
+    /*
+       Không ép 8K trên điện thoại.
+       Tự giới hạn pixel để tránh crash.
+    */
+
+    const maxPixels =
+        1280*720;
+
+    const screenPixels =
+        Math.max(
+            1,
+            innerWidth*innerHeight
+        );
+
+    const quality =
+        Math.min(
+            1,
+            Math.sqrt(
+                maxPixels/
+                screenPixels
+            )
+        );
+
+    const dpr =
+        Math.min(
+            window.devicePixelRatio||1,
+            1.5
+        );
+
+
+    canvas.width =
+        Math.max(
+            1,
+            Math.floor(
+                innerWidth*
+                dpr*
+                quality
+            )
+        );
+
+    canvas.height =
+        Math.max(
+            1,
+            Math.floor(
+                innerHeight*
+                dpr*
+                quality
+            )
+        );
+
+
+    gl.viewport(
+        0,
+        0,
+        canvas.width,
+        canvas.height
+    );
+}
+
+
+window.addEventListener(
+    "resize",
+    resize
+);
+
+resize();
+
+
+/* =========================================================
+   UPDATE
+========================================================= */
+
+function update(dt){
+
+    time += dt;
+
+
+    if(autoMove){
+
+        randomTimer += dt;
+
+
+        if(randomTimer>3){
+
+            targetVelocity =
+                randomDirection();
+
+            randomTimer=0;
+        }
+
+
+        for(
+            let i=0;
+            i<4;
+            i++
+        ){
+
+            velocity[i] +=
+
+                (
+                    targetVelocity[i]
+                    -
+                    velocity[i]
+                )
+                *
+                Math.min(
+                    1,
+                    dt*.7
+                );
+
+
+            position[i] +=
+                velocity[i]*
+                dt;
+        }
+
+
+        /* soft boundaries */
+
+        for(
+            let i=0;
+            i<4;
+            i++
+        ){
+
+            if(
+                Math.abs(
+                    position[i]
+                )>7
+            ){
+
+                position[i] =
+                    Math.sign(
+                        position[i]
+                    )*7;
+
+                velocity[i]*=-1;
+                targetVelocity[i]*=-1;
+            }
+        }
+    }
+
+
+    if(autoRotate){
+
+        cameraYaw +=
+            dt*.11;
+    }
+}
+
+
+/* =========================================================
+   RENDER
+========================================================= */
+
+function render(){
+
+    gl.clearColor(
+        .008,
+        .012,
+        .025,
+        1
+    );
+
+    gl.clear(
+        gl.COLOR_BUFFER_BIT
+    );
+
+
+    const positions=[];
+    const sizes=[];
+    const alphas=[];
+
+
+    /* background stars */
+
+    for(
+        const star of stars
+    ){
+
+        const q =
+            camera3D([
+
+                star.x-position[0],
+                star.y-position[1],
+                star.z-position[2]
+
+            ]);
+
+        const screen =
+            screenPosition(q);
+
+
+        positions.push(
+            screen[0],
+            screen[1],
+            q[2]
+        );
+
+        sizes.push(
+            star.size
+        );
+
+        alphas.push(
+            .22
+        );
+    }
+
+
+    /* 4D geometry */
+
+    const projected=[];
+
+
+    for(
+        const vertex
+        of vertices
+    ){
+
+        const rotated =
+            rotate4D(vertex);
+
+        const projected4 =
+            project4D(rotated);
+
+        /*
+           Di chuyển toàn bộ
+           cấu trúc trong 4D.
+        */
+
+        projected4[0]
+            += position[0];
+
+        projected4[1]
+            += position[1];
+
+        projected4[2]
+            += position[2];
+
+
+        const camera =
+            camera3D(
+                projected4
+            );
+
+
+        projected.push(
+            camera
+        );
+    }
+
+
+    /* glowing vertices */
+
+    for(
+        const p
+        of projected
+    ){
+
+        const screen =
+            screenPosition(p);
+
+
+        /* halo */
+
+        positions.push(
+            screen[0],
+            screen[1],
+            p[2]
+        );
+
+        sizes.push(15);
+        alphas.push(.13);
+
+
+        /* middle glow */
+
+        positions.push(
+            screen[0],
+            screen[1],
+            p[2]
+        );
+
+        sizes.push(8);
+        alphas.push(.3);
+
+
+        /* bright core */
+
+        positions.push(
+            screen[0],
+            screen[1],
+            p[2]
+        );
+
+        sizes.push(4.5);
+        alphas.push(1);
+    }
+
+
+    /* edges */
+
+    for(
+        const edge
+        of edges
+    ){
+
+        const a =
+            projected[
+                edge[0]
+            ];
+
+        const b =
+            projected[
+                edge[1]
+            ];
+
+
+        const A =
+            screenPosition(a);
+
+        const B =
+            screenPosition(b);
+
+
+        /*
+           Chỉ 4 điểm trung gian.
+           Rất nhẹ cho GPU điện thoại.
+        */
+
+        const steps=4;
+
+
+        for(
+            let i=0;
+            i<=steps;
+            i++
+        ){
+
+            const amount =
+                i/steps;
+
+
+            positions.push(
+
+                A[0]*(1-amount)+
+                B[0]*amount,
+
+                A[1]*(1-amount)+
+                B[1]*amount,
+
+                a[2]*(1-amount)+
+                b[2]*amount
+            );
+
+
+            sizes.push(2.5);
+            alphas.push(.8);
+        }
+    }
+
+
+    /* upload */
+
+    gl.bindBuffer(
+        gl.ARRAY_BUFFER,
+        positionBuffer
+    );
+
+    gl.bufferData(
+        gl.ARRAY_BUFFER,
+        new Float32Array(
+            positions
+        ),
+        gl.DYNAMIC_DRAW
+    );
+
+    gl.enableVertexAttribArray(
+        positionLocation
+    );
+
+    gl.vertexAttribPointer(
+        positionLocation,
+        3,
+        gl.FLOAT,
+        false,
+        0,
+        0
+    );
+
+
+    gl.bindBuffer(
+        gl.ARRAY_BUFFER,
+        sizeBuffer
+    );
+
+    gl.bufferData(
+        gl.ARRAY_BUFFER,
+        new Float32Array(
+            sizes
+        ),
+        gl.DYNAMIC_DRAW
+    );
+
+    gl.enab
